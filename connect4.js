@@ -11,10 +11,11 @@ const HEIGHT = 6;
 let currPlayer = 1; // active player: 1 or 2
 
 class Game {
-  constructor(height, width) {
+  constructor(height = HEIGHT, width = WIDTH) {
     this.height = height;
     this.width = width;
     this.board = [];  // array of rows, each row is array of cells (board[y][x])
+    this.gameOver = false;
     this.startGame();
   }
 
@@ -30,12 +31,18 @@ class Game {
   /** makeHtmlBoard: make HTML table and row of column tops. */
   makeHtmlBoard() {
     const board = document.getElementById('board');
+    board.innerHTML = '';
 
     // make column tops (clickable area for adding a piece to that column)
     const top = document.createElement('tr');
     top.setAttribute('id', 'column-top');
 
-    top.addEventListener('click', this.handleClick.bind(this));
+    // keep a reference to the bound handleClick so that it may be used 
+    // when ending the game.
+
+    this.handleGameClick = this.handleClick.bind(this);
+
+    top.addEventListener('click', this.handleGameClick);
 
     for (let x = 0; x < this.width; x++) {
       const headCell = document.createElement('td');
@@ -82,6 +89,8 @@ class Game {
 
   /** endGame: announce game end */
   endGame(msg) {
+    const top = document.getElementById('column-top');
+    top.removeEventListener('click', this.handleGameClick);
     alert(msg);
   }
 
@@ -154,5 +163,6 @@ class Game {
 
 }
 
-new Game(HEIGHT, WIDTH);
-
+document.getElementById('start-game').addEventListener('click', () => {
+  new Game();
+});

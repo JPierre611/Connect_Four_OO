@@ -11,11 +11,11 @@ const HEIGHT = 6;
 let currPlayer = 1; // active player: 1 or 2
 
 class Game {
-  constructor(height = HEIGHT, width = WIDTH) {
+  constructor(p1, p2, height = HEIGHT, width = WIDTH) {
+    this.players = [p1, p2];
     this.height = height;
     this.width = width;
-    this.board = [];  // array of rows, each row is array of cells (board[y][x])
-    this.gameOver = false;
+    this.currPlayer = this.players[0];
     this.startGame();
   }
 
@@ -23,6 +23,7 @@ class Game {
    *   board = array of rows, each row is array of cells  (board[y][x])
    */
   makeBoard() {
+    this.board = [];
     for (let y = 0; y < this.height; y++) {
       this.board.push(Array.from({ length:this.width }));
     }
@@ -80,8 +81,7 @@ class Game {
   placeInTable(y, x) {
     const piece = document.createElement('div');
     piece.classList.add('piece');
-    piece.classList.add(`p${currPlayer}`);
-    piece.style.top = -50 * (y + 2);
+    piece.style.backgroundColor = this.currPlayer.color;
 
     const spot = document.getElementById(`${y}-${x}`);
     spot.append(piece);
@@ -106,12 +106,12 @@ class Game {
     }
 
     // place piece in board and add to HTML table
-    this.board[y][x] = currPlayer;
+    this.board[y][x] = this.currPlayer;
     this.placeInTable(y, x);
     
     // check for win
     if (this.checkForWin()) {
-      return this.endGame(`Player ${currPlayer} won!`);
+      return this.endGame(`The ${this.currPlayer.color} player won!`);
     }
     
     // check for tie
@@ -120,7 +120,8 @@ class Game {
     }
       
     // switch players
-    currPlayer = currPlayer === 1 ? 2 : 1;
+    this.currPlayer = 
+      this.currPlayer === this.players[0] ? this.players[1] : this.players[0];
   }
 
   /** checkForWin: check board cell-by-cell for "does a win start here?" */
@@ -136,7 +137,7 @@ class Game {
           y < this.height &&
           x >= 0 &&
           x < this.width &&
-          this.board[y][x] === currPlayer
+          this.board[y][x] === this.currPlayer
       );
 
     for (let y = 0; y < this.height; y++) {
@@ -163,6 +164,14 @@ class Game {
 
 }
 
+class Player {
+  constructor(color) {
+    this.color = color;
+  }
+}
+
 document.getElementById('start-game').addEventListener('click', () => {
-  new Game();
+  let p1 = new Player(document.getElementById('p1-color').value);
+  let p2 = new Player(document.getElementById('p2-color').value);
+  new Game(p1, p2);
 });
